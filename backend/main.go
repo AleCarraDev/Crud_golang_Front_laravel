@@ -30,16 +30,26 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/produtos", produtosHandler)           // Rota para listar e adicionar produtos
-	mux.HandleFunc("/produtos/importar", importarProdutos) // Rota para importar produtos
-	mux.HandleFunc("/produtos/", produtoEspecificoHandler) // Rota para produto específico (com ID)
-	mux.HandleFunc("/produtos/excluir/", excluirProduto)   // Rota para excluir produto
-	mux.HandleFunc("/produtos/{id}", editarProduto)        // Rota para editar produto (PUT)
+	mux.HandleFunc("/produtos", produtosHandler)                      // Rota para listar e adicionar produtos
+	mux.HandleFunc("/produtos/importar", importarProdutos)            // Rota para importar produtos
+	mux.HandleFunc("/produtos/{id:[0-9]+}", produtoEspecificoHandler) // Rota para produto específico com ID
+	mux.HandleFunc("/produtos/excluir/", excluirProduto)              // Rota para excluir produto
+	mux.HandleFunc("/produtos/{id}", editarProduto)                   // Rota para editar produto (PUT)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
 
+func configurarCORS(w http.ResponseWriter, r *http.Request) {
+	// Permite qualquer origem. Para segurança, pode especificar um domínio no lugar de "*"
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+}
+
 func produtosHandler(w http.ResponseWriter, r *http.Request) {
+	// Configura CORS para esta rota
+	configurarCORS(w, r)
+
 	if r.Method == http.MethodGet {
 		listarProdutos(w, r)
 	} else if r.Method == http.MethodPost {
